@@ -1,9 +1,24 @@
 import React, { Component } from 'react';
 import { gql, graphql } from 'react-apollo';
 
+const Trigger = graphql(gql`
+  query {
+    people {
+      # adding the ID will fix the issue
+      # id
+      lastName
+    }
+  }
+`)(() => <div />);
+
 class App extends Component {
+  state = { showTheError: false };
+  componentDidMount() {
+    setTimeout(() => this.setState({ showTheError: true }), 5000);
+  }
   render() {
     const { data: { loading, people } } = this.props;
+    const { showTheError } = this.state;
     return (
       <main>
         <header>
@@ -20,17 +35,18 @@ class App extends Component {
             Currently the schema just serves a list of people with names and ids.
           </p>
         </header>
-        {loading ? (
+        {(loading || !people) ? (
           <p>Loading…</p>
         ) : (
           <ul>
             {people.map(person => (
               <li key={person.id}>
-                {person.name}
+                {person.firstName}
               </li>
             ))}
           </ul>
         )}
+        {showTheError && <Trigger />}
       </main>
     );
   }
@@ -40,7 +56,7 @@ export default graphql(
   gql`{
     people {
       id
-      name
+      firstName
     }
   }`,
 )(App)
